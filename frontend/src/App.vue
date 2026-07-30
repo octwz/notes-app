@@ -97,11 +97,17 @@ const form = ref({ title: '', content: '' });
 const editing = ref(false);
 const editId = ref(null);
 
-const API_URL = '/api/notes';
+// ✅ CONNECTED TO RENDER BACKEND (PRODUCTION)
+const API_URL = 'https://notes-backend-68ik.onrender.com/api/notes';
 
 const fetchNotes = async () => {
-  const res = await axios.get(API_URL);
-  notes.value = res.data;
+  try {
+    const res = await axios.get(API_URL);
+    notes.value = res.data;
+  } catch (error) {
+    console.error('Error fetching notes:', error);
+    alert('Failed to load notes. Please check if backend is running.');
+  }
 };
 
 const saveNote = async () => {
@@ -109,15 +115,20 @@ const saveNote = async () => {
     alert('Please fill in both fields ✍️');
     return;
   }
-  if (editing.value) {
-    await axios.put(`${API_URL}/${editId.value}`, form.value);
-    editing.value = false;
-    editId.value = null;
-  } else {
-    await axios.post(API_URL, form.value);
+  try {
+    if (editing.value) {
+      await axios.put(`${API_URL}/${editId.value}`, form.value);
+      editing.value = false;
+      editId.value = null;
+    } else {
+      await axios.post(API_URL, form.value);
+    }
+    form.value = { title: '', content: '' };
+    await fetchNotes();
+  } catch (error) {
+    console.error('Error saving note:', error);
+    alert('Failed to save note. Please try again.');
   }
-  form.value = { title: '', content: '' };
-  await fetchNotes();
 };
 
 const editNote = (note) => {
@@ -129,8 +140,13 @@ const editNote = (note) => {
 
 const deleteNote = async (id) => {
   if (!confirm('Are you sure you want to delete this note? 🗑️')) return;
-  await axios.delete(`${API_URL}/${id}`);
-  await fetchNotes();
+  try {
+    await axios.delete(`${API_URL}/${id}`);
+    await fetchNotes();
+  } catch (error) {
+    console.error('Error deleting note:', error);
+    alert('Failed to delete note. Please try again.');
+  }
 };
 
 const cancelEdit = () => {
