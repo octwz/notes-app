@@ -1,0 +1,15 @@
+# Node
+node_modules/
+npm-debug.log*
+.env
+
+# Backend DB (optional, but good to exclude)
+backend/notes.db
+
+# Frontend build
+frontend/dist/
+frontend/.vite/
+
+# OS files
+.DS_Store
+Thumbs.db
